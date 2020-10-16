@@ -143,6 +143,9 @@
 //	 Remove progress prints from cleanUp.
 //     - optionVar -iv silentCleanUpOption 1;  // Disable prints.
 //     - optionVar -iv silentCleanUpOption 0;  // Enable prints (default behaviour).
+//
+//	 Additional Optimise options.
+//     - turtleOption  // Remove all turtle rendering nodes.
 // /mod
 
 
@@ -1506,6 +1509,29 @@ global proc performCleanUpScene ()
             // /mod
 		}
 	}
+
+    // mod
+	if( cleanUp_CheckInterrupt() )
+	{
+		if (`optionVar -query turtleOption`) {
+            if(!$silent_cleanUp) {
+                print ("Removing Turtle Rendering nodes");
+                print "------------------------------------\n";
+            }
+			
+			int $numDel = 0;
+			$errorCount += 	catch( $numDel = removeTurtleRenderingNodes() );
+			
+            string $fmt = ("Removed ^1s Turtle Render nodes");
+            cleanUp_Summary( ("Removed Turtle Rendering networks"), 
+                             `format -s $numDel $fmt` );
+
+            if(!$silent_cleanUp) {
+                print "\n";
+            }
+		}
+	}
+    // /mod
 	
 	$errorCount += userCleanUp_PerformCleanUpScene();
 	
@@ -1918,6 +1944,19 @@ global proc performCleanUpSceneForEverything ()
     }
     // /mod
 
+	//	23a. Delete Turtle Render nodes
+	//
+	$numDel = 0;
+    $errorCount += 	catch( $numDel = removeTurtleRenderingNodes(0) );
+    $fmt = ("Removed ^1s Turtle Rendering nodes");
+    cleanUp_Summary( ("Removed Turtle Rendering nodes"), 
+                     `format -s $numDel $fmt` );
+    // mod
+    if(!$silent_cleanUp) {
+        print "\n";
+    }
+    // /mod
+
 	//	24. Run user-defined cleanup operations
 	//
 	$errorCount += userCleanUp_PerformCleanUpScene();
@@ -2228,6 +2267,18 @@ global proc createCleanUpSceneTabUI (string $tabLayout)
 			
 			separator;
 			
+            // mod
+			rowLayout -nc 2 -cat 2 "left" 0 -cw 1 $textWidth;
+				checkBoxGrp -ncb 1  -label ("Remove Additional:") 
+					-label1 ("Turtle Rendering nodes")  turtleOption;
+				button -label $optimNow 
+					   -height $useHeight 
+					   -c "scOpt_performOneCleanup( { \"turtleOption\" } )";			
+				setParent ..;
+
+			separator;
+            // /mod
+			
 			userCleanUp_CreateUI();
 
 			//separator;
@@ -2299,6 +2350,10 @@ global proc setOptionVars(int $forceFactorySettings)
         optionVar -intValue unknownNodesOption false;
     if ($forceFactorySettings || !`optionVar -exists shadingNetworksOption`)
         optionVar -intValue shadingNetworksOption false;
+    // mod
+    if ($forceFactorySettings || !`optionVar -exists turtleOption`)
+        optionVar -intValue turtleOption false;
+    // /mod
 
 	userCleanUp_SetOptionVars($forceFactorySettings);
 }
@@ -2420,6 +2475,12 @@ global proc cleanUpSceneCallback(string $parent, int $doIt)
         optionVar -intValue shadingNetworksOption
             `checkBoxGrp -query -value1 shadingNetworksOption`;
     }
+    // mod
+    if (`checkBoxGrp -exists turtleOption`) {
+        optionVar -intValue turtleOption
+            `checkBoxGrp -query -value1 turtleOption`;
+    }
+    // /mod
 
 	userCleanUp_CleanUpSceneCallback( $parent, $doIt );
 }
@@ -2565,6 +2626,13 @@ global proc cleanUpSceneSetup(string $parent, int $forceFactorySettings)
             -value1 `optionVar -query shadingNetworksOption`
             shadingNetworksOption;
     }
+    // mod
+    if (`checkBoxGrp -exists turtleOption`) {
+        checkBoxGrp -edit
+            -value1 `optionVar -query turtleOption`
+            turtleOption;
+    }
+    // /mod
 
 	userCleanUp_CleanUpSceneSetup( $parent, $forceFactorySettings );
 }
@@ -2984,7 +3052,8 @@ global proc string [] scOpt_allCleanUpOptionVars()
 		"referencedOption",
 		"brushOption",
 		"unknownNodesOption",
-		"shadingNetworksOption"
+		"shadingNetworksOption",
+        "turtleOption" // mod/
 	};
 
 	string $userCleanUps[] = userCleanUp_GetOptionVars();

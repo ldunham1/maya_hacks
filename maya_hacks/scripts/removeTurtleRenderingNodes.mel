@@ -1,0 +1,16 @@
+
+
+global proc int removeTurtleRenderingNodes()
+{
+    int $oldSceneNodeCount = size(`ls`);
+    
+	if (!exists("ilrClearSceneForce")) { 
+        eval("source ilrStartup.mel; ilrLoadScripts();"); 
+    }
+    ilrClearSceneForce();
+    
+    int $newSceneNodeCount = size(`ls`);
+	int $numDeleted = $oldSceneNodeCount - $newSceneNodeCount;
+	
+	return $numDeleted;
+}
