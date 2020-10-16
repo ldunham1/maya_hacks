@@ -1515,7 +1515,7 @@ global proc performCleanUpScene ()
 	{
 		if (`optionVar -query turtleOption`) {
             if(!$silent_cleanUp) {
-                print ("Removing Turtle Rendering nodes");
+                print ("Removing Turtle Rendering nodes\n");
                 print "------------------------------------\n";
             }
 			

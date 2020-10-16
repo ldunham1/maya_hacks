@@ -1,0 +1,103 @@
+// ===========================================================================
+// Copyright 2019 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk license
+// agreement provided at the time of installation or download, or which
+// otherwise accompanies this software in either electronic or hard copy form.
+// ===========================================================================
+//
+//
+//  Creation Date: 2001 
+//
+//
+//<doc>
+//<name deleteUnusedBrushes>
+//
+//<synopsis>
+//		deleteUnusedBrushes
+//
+//<returns>
+//		None.	
+//
+//<description>
+//		This deletes all brushes that are not attached to any strokes
+//		This can be used to clean up default brush nodes that may accumulate
+//		when doing a large number of import operations.
+//
+//<flags>
+//	None.
+//
+//<examples>
+// deleteUnusedBrushes;
+//
+//</doc>
+
+
+// mod
+//	 Ensure defaultBrush doesnt remain if it never existed before.
+// /mod
+
+
+global proc int deleteUnusedBrushes()
+{
+	//	Are we being called during an Optimize Scene Size operation?
+	// 	If so, we need to display progress information.  This was done
+	//	as a global variable to avoid having to change the signature of
+	//	the proc, as that could break many scripts, both internal and
+	//	customer-written.
+	//
+	int $showProgress = cleanUp_ShouldReportProgress();
+
+	int $i;
+
+	string	$brushes[] = `ls -type brush`;
+    
+    // mod
+    int $defaultBrushExisted = `objExists defaultBrush`;
+    // /mod
+    
+	string  $defaultBrush = getDefaultBrush();
+
+	if( $showProgress )
+	{
+		cleanUp_StartProgress( size($brushes), "Deleting unused brushes", 1 );
+	}
+
+	int $numDeleted = 0;
+
+	for( $i = 0; $i < size( $brushes ); $i++ )
+	{
+		if( $showProgress )
+		{
+			if( cleanUp_SetProgress($i) ) break;
+		}
+
+		if( $brushes[$i] != $defaultBrush ){
+			string $con[] = `listConnections ($brushes[$i]+".outBrush")`;
+			if( size( $con ) == 0 ){
+				if ( `reference -q -isNodeReferenced $brushes[$i]`) {
+					warning( (uiRes("m_deleteUnusedBrushes.kCantDeleteUnusedBrush")));
+				}
+				else {
+					string $cmd = "delete " + $brushes[$i];
+					evalEcho($cmd);
+					$numDeleted++;
+				}
+			}
+		}
+	}
+    
+    // mod
+    if(!$defaultBrushExisted && `objExists defaultBrush`) {
+        delete defaultBrush;
+        // Dont count the deletion of an object that shouldn't have existed...
+    }
+    // /mod
+	
+	if( $showProgress )
+	{
+		cleanUp_EndProgress();
+	}
+
+	return $numDeleted;	
+}
