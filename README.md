@@ -14,10 +14,12 @@ Maya example scripts to fix or extend existing behaviour in maya.
 
 ### Distribution
 It would be possible to distribute as a Maya module. 
-1. Create a text file (.mod) with
- `+ mayaHacks 1.0 <PATH>/maya_hacks/maya_hacks` - replacing `<PATH>`.
+1. Create a text file (.mod) containing;
+
+   `+ mayaHacks 1.0 <PATH>/maya_hacks/maya_hacks` 
+    * replacing `<PATH>` with the project location.
 2. Save the .mod file to a MAYA_MODULE_PATH directory.
- (this would typically be /My Documents/maya/modules).
+    * This would typically be _../My Documents/maya/modules_.
 
 
 ### Documentation
