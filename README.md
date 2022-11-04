@@ -4,7 +4,7 @@ This is for educational/learning purposes only.
 Maya example scripts to fix or extend existing behaviour in maya.
 
 
-> :warning: The userSetup.py modifies the MAYA_SCRIPT_PATH on 
+> The userSetup.py modifies the MAYA_SCRIPT_PATH on 
 > startup to ensure .mel scripts override Maya's own internal 
 > scripts whilst preserving the user's script directories.
 >
@@ -36,3 +36,4 @@ It would be possible to distribute as a Maya module.
     * Option Variable `turtleOption`(int).
     * Available in the Optimise Scene Ui.
 * Remove Unused Brushes no longer creates a new defaultBrush.
+* Ask user to confirm before pasting into scene (ctrl+V).
